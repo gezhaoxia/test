@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+       mamespace：命名空间;指定为接口的全类名可以进行接口绑定
+       id：唯一标识
+       resultType：返回值类型
+-->
+<mapper namespace="com.zuoshao.vote.mapper.Condidatemapper">
+    <select id="selectssidallcondidate" parameterType="int" resultType="java.util.ArrayList">
+SELECT  c.`id`,c.`name`,c.`discrible`,c.`image`,c.`adduserid` FROM `session` AS ss LEFT JOIN session_condidate AS ac ON ss.`id`=ac.`session_id`
+LEFT JOIN condidate AS c ON ac.`condidate_id` = c.`id` WHERE ss.`id`= #{sessionid} GROUP BY c.`id`
+    </select>
+    <select id="selectfightcondidate" parameterType="int" resultType="java.util.ArrayList">
+        SELECT c.`id`,c.`name`,c.`discrible`,c.`image`,c.`adduserid` FROM fight_condidate AS fc,condidate AS c WHERE fc.`condidateid`=c.`id` AND fc.`fightid`= #{fightid}
+    </select>
+</mapper>

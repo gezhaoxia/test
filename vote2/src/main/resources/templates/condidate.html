@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" content="multipart/form-data;"/>
+    <title>Title</title>
+</head>
+<body>
+
+<div id="tb">
+    <button id="butaddren" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加</button>
+    <button id="butupdateren" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</button>
+    <button id="butdeleteren" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">删除</button>
+</div>
+<div>
+<table id="tableren"></table>
+</div>
+
+<div id="winren" style="display: none">
+    <form id="formren" method="post">
+        <br/><br/>
+        <lable>人员编号：</lable><input id="renid" class="easyui-textbox"  data-options="readonly:true" style="width:30px"/><span>系统自带的</span>
+        <br/><br/>
+        <lable>人员名称：</lable><input id="renname" class="easyui-validatebox" data-options="required:true,missingMessage:'请输入参赛人员名字'" style="width:300px;height:30px"/>
+        <br/><br/>
+        <lable>人员简介：</lable><input id="reninfomation" class="easyui-validatebox" data-options="required:true,missingMessage:'请输入人员的简介'" style="width:300px;height:30px"/>
+        <br/><br/>
+        <lable>图片:</lable>
+        <input id="fb" type="text" style="width:250px"/>
+        <br/><br/>
+        <button style="width: 100px;margin-left: 30%;" id="addren" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存并添加</button>
+    </form>
+
+
+    <!--<form id="form1" runat="server">-->
+    <!--<lable>图片:</lable>-->
+    <!--<input id="fb" type="text" style="width:250px"/>-->
+    <!--<button id="fileupload" type="submit" class="easyui-linkbutton" data-options="iconCls:'icon-print'" style="width:80px">上传查看</button>-->
+    <!--<div style="height: 200px;width: 200px;border:1px solid red;margin-left: 30px">-->
+        <!--<img id="img1" src="" alt=""/>-->
+    <!--</div>-->
+    <!--</form>-->
+</div>
+
+<div id="winmm" class="easyui-window" title="My Window" style="width:300px;height:200px"
+     data-options="iconCls:'icon-save',modal:true,closed:true">
+    <lable style="color: red;font-size: 20px">删除该人员会间接影响该人员所参加的比赛和对战</lable>
+    <p  style="color: red;font-size: 20px">是否强制删除</p>
+
+    <button id="qingzhishanchu" class="easyui-linkbutton" data-options="plain:true">强制删除</button>
+    <button id="closewinmm" style="margin-left: 150px;color: red" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-cancel'">不删除</button>
+</div>
+
+<script type="text/javascript">
+
+    //删除一个人员
+    $("#butdeleteren").click(function () {
+        var r = $('#tableren').datagrid('getSelected');	// get the selected row
+
+        if (r==null){
+            alert("请选择要删除的人员")
+        } else{
+            $('#winmm').window('open'); // open a window
+
+        }
+
+    })
+
+    $("#qingzhishanchu").click(function () {
+        var r = $('#tableren').datagrid('getSelected');	// get the selected row
+        $.ajax({
+            url:"deletecondidate",
+            type:"get",
+            data:{
+                id:r.id
+            },
+            success:function (data) {
+                alert("删除成功")
+                $('#winmm').window('close');
+                $('#tableren').datagrid('reload');
+            }
+
+        })
+    })
+
+    $("#closewinmm").click(function () {
+        $('#winmm').window('close'); // open a window
+    })
+
+
+    // 开始就创建一个文件框
+    $('#fb').filebox({
+        buttonText: '选择文件',
+        buttonAlign: 'right',
+        accept:'image/jpeg,image/png,image/jpeg,image/jpeg'
+    })
+
+    //加号标签弹出新增人员窗口
+    $("#butaddren").click(function () {
+
+        $('#winren').window({
+            title: "添加一个新的参赛人员",
+            width: 600,
+            height: 400,
+            draggable: true,
+            resizable: true,
+            shadow: false
+        });
+
+    })
+    //输入信息后添加并保存一个人
+    $("#addren").click(function () {
+
+        var al1 = $("#renname").val()
+        var al2 = $("#reninfomation").val()
+        var filePathName = $("#fb").filebox('getValue');
+        console.log(al1)
+        console.log(al2)
+        console.log(filePathName)
+        $('#tableren').datagrid('reload');
+        $('#winren').window('close');
+    })
+
+    function addren(){
+
+        var al1 = $("#renname").val();
+        var al2 = $("#reninfomation").val();
+        var filePathName = $("#fb").filebox('getValue');
+
+        $.ajax({
+            url:"addcondidate",
+            type:"post",
+            dataType:"json",
+            data:{
+                name:al1,
+                discrible:al2,
+                image:filePathName
+            },
+            success:function (data) {
+                alert("添加成功")
+                var tab = $('#tt').tabs('getSelected');  // 刷新当前页面
+                tab.panel('refresh', 'condidatemanage');
+            }
+        })
+    }
+
+
+    $(function () {
+        //开始加载一个所有人员的表格
+        console.log("我使用了")
+        $('#tableren').datagrid({
+            url: 'condidateall',
+            singleSelect: true,
+            columns: [[
+                {field: 'id', title: '编号', width: 60},
+                {field: 'name', title: '名字', width: 100},
+                {field: 'discrible', title: '介绍', width: 200, align: 'right'},
+                {field: 'image', title: '图片', width: 200, align: 'right'}
+            ]]
+        });
+
+        $('#formren').form({
+            success: function () {  //提交成功后执行的方法
+                addren();
+            }
+        });
+
+        // $('#form1').form({
+        //     success: function () {  //提交成功后执行的方法
+        //         btnUpload();
+        //     }
+        // });
+        // 文件上传
+        // $("#fileupload").click(function (e) {
+        //     e.preventDefault();
+        //     console.log("进拉力")
+        //     var filePathName = $("#fb").filebox('getValue');
+        //     var al1 = $("#renname").val()
+        //     console.log(filePathName)
+        //     $.ajax({
+        //         url:"fileUpload",
+        //         type:"post",
+        //         data:{
+        //             username:al1,
+        //             filename:filePathName
+        //         },
+        //         success:function (data) {
+        //             alert("上传成功")
+        //         }
+        //
+        //     })
+        //
+        // })
+
+    })
+    // function btnUpload() {  //异步上传图片的方法
+    //     $.ajax({
+    //         url: 'fileUpload', //执行上传处理的文件地址
+    //         // secureuri: false, //是否加密，一般是false，默认值为false
+    //         fileElementId: 'filebox_file_id_1', //这里 的filebox的id为 filebox_file_id_1而不是fileName
+    //         type: 'post', //请求方式，如果传递额外数据，必须是post
+    //         success: function (data) {//成功的回调函数，内部处理会加上html标签
+    //             //因返回的data 是dom对象需转换成jquery对象才能获取到对应的相对路径
+    //             $("#img1").attr("src", $(data).text());
+    //         }
+    //     });
+    //     $('#fileName').filebox('clear');//上传成功后清空里面的值
+    // }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8"/>
+	<title>Title</title>
+	<link rel="stylesheet" type="text/css" href="/easyui/themes/default/easyui.css"/>
+	<link rel="stylesheet" type="text/css" href="/easyui/themes/icon.css"/>
+	<script type="text/javascript" src="/easyui/jquery.min.js"></script>
+	<script type="text/javascript" src="/easyui/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="/easyui/easyui-lang-zh_CN.js"></script>
+
+</head>
+<body class="easyui-layout">
+<div data-options="region:'north',border:false" style="height:60px;background:#B3DFDA;padding:10px">后台管理系统</div>
+
+<div data-options="region:'west',split:true,title:'West'" style="width:200px;padding:10px;">
+	<div class="easyui-accordion" style="width:180px;height:300px;">
+		<div title="比赛对战管理" data-options="iconCls:'icon-ok'" style="overflow:auto;padding:10px;">
+
+			<ul>
+				<li><a href="javascript:addattrtabs();">比赛场次信息管理项</a></li>
+				<li><a href="javascript:fighttables();">对战信息管理项</a></li>
+			</ul>
+
+		</div>
+		<div title="人员管理" data-options="iconCls:'icon-help'" style="padding:10px;">
+			<ul>
+				<li><a href="javascript:addcondidatetabls();">候选人管理项</a></li>
+			</ul>
+		</div>
+		<div title="投票管理" data-options="iconCls:'icon-search'" style="padding:10px;">
+			<ul class="easyui-tree">
+				<li>
+					<a href="javascript:votetables();">票数管理</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div data-options="region:'east',split:true,collapsed:true,title:'East'" style="width:100px;padding:10px;">east region</div>
+<div data-options="region:'south',border:false" style="height:50px;background:#A9FACD;padding:10px;">south region</div>
+<div data-options="region:'center',title:'Center'">
+	<div id="tt" class="easyui-tabs" style="width: 100%;height: 100%">
+
+	</div>
+</div>
+
+
+
+
+<script language="JavaScript">
+    function addattrtabs() {
+        var b =$("#tt").tabs("exists","比赛场次信息管理")
+
+        if (!b)
+        {
+            $("#tt").tabs("add",{
+                title:"比赛场次信息管理",
+                href:"gamesession",
+                closable:true
+            })
+        }else {
+            $("#tt").tabs("select","比赛场次信息管理")
+        }
+
+    }
+    function addcondidatetabls() {
+        var b =$("#tt").tabs("exists","候选人信息管理")
+
+        if (!b)
+        {
+
+            $("#tt").tabs("add",{
+                title:"候选人信息管理",
+                href:"condidatemanage",
+                closable:true
+            })
+
+        }else {
+            $("#tt").tabs("select","候选人信息管理")
+        }
+
+    }
+
+    function fighttables() {
+        var b =$("#tt").tabs("exists","对战信息管理")
+
+        if (!b)
+        {
+            $("#tt").tabs("add",{
+                title:"对战信息管理",
+                href:"fight",
+                closable:true
+            })
+        }else {
+            $("#tt").tabs("select","对战信息管理")
+        }
+
+    }
+    function votetables() {
+        var b =$("#tt").tabs("exists","票数管理")
+
+        if (!b)
+        {
+            $("#tt").tabs("add",{
+                title:"票数管理",
+                href:"votetables",
+                closable:true
+            })
+        }else {
+            $("#tt").tabs("select","票数管理")
+        }
+
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" http-equiv="Refresh" content="3"/>
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.js"></script>
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.css" rel="stylesheet"/>
+    <link th:href="@{css/vs.css}" rel="stylesheet" href="../../static/css/vs.css"/>
+    <!--<link th:href="@{css/style.css}" rel="stylesheet" href="../../static/css/style.css"/>-->
+    <script th:src="@{js/vs.js}" src="../js/vs.js"></script>
+</head>
+<body>
+<div class="s-bg">
+
+    <div class="s-all-vs">
+        <div class="s-user1"><span th:text="${session.condidate[0].name}"></span></div>
+        <div class="s-user1-l"><p>0票</p></div>
+            <div class="s-vs">
+                <div class="s-vs-r"></div>
+                <div class="s-vs-l"></div>
+                <div class="s-sg"><img src="../../static/img/vs-v.png" th:src="@{vote/images/vs-v.png}"  /></div>
+            </div>
+        <div class="s-user2"><span th:text="${session.condidate[1].name}"></span></div>
+        <div class="s-user2-r"><p>0票</p></div>
+    </div>
+</div>
+<script th:inline="javascript">
+    $(function () {
+        function begin(le,ri) {
+            //闪光的png位置
+            let all=le+ri
+            let lpx=(le/all)*790
+            let rpx=(ri/all)*790
+            let vg=-104+lpx
+            console.log(vg)
+            $(".s-vs-l").animate({
+                "width":lpx+"px"
+            },1000,function () {
+                $(".s-user1-l p").text(le+"票")
+            })
+            $(".s-vs-r").animate({
+                "width":rpx+"px"
+            },1000,function () {
+                $(".s-user2-r p").text(ri+"票")
+            })
+            $(".s-sg img").animate({
+                "left":vg+"px"
+            },1000)
+
+        }
+
+        var fightid=[[${session.fightid}]]
+        var input = $("#input").text()
+        console.log(input)
+        $.ajax({
+            url:"censusvote",
+            type:"get",
+            data:{
+                fightid:fightid
+            },
+            success:function (data) {
+                begin(data[0],data[1])
+            }
+        })
+
+    })
+
+</script>
+</body>
+</html>

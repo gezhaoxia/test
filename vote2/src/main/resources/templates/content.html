@@ -1,0 +1,111 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="ie6 oldie"/> <![endif]-->
+<!--[if IE 7]>    <html class="ie7 oldie"/> <![endif]-->
+<!--[if IE 8]>    <html class="ie8 oldie"/> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="" xmlns:th="http://www.thymeleaf.org">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Untitled Document</title>
+<link th:href="@{vote/css/boilerplate.css}" href="css/boilerplate.css" rel="stylesheet" type="text/css"/>
+<link th:href="@{vote/css/style.css}" href="css/style.css" rel="stylesheet" type="text/css"/>
+<link th:href="@{vote/css/sweet-alert.css}" href="css/sweet-alert.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 9]>
+<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script th:src="@{vote/js/respond.min.js}" src="js/respond.min.js"></script>
+<script th:src="@{vote/js/sweet-alert.min.js}" src="js/sweet-alert.min.js"></script>
+</head>
+<body style="background:#c30d23">
+
+<div id="audio_btn" class="video_exist off play_yinfu" style="display: block;">
+    <div id="yinfu" class="rotate"></div>
+    <audio loop="" th:src="@{vote/music/bg_21.mp3}" src="music/bg_21.mp3" id="media" autoplay="" preload="preload"></audio>
+</div>
+
+<div id="content_title1" class="fluid clearfix" >
+    <div class="content_title">
+        <span id="fightid" th:text="${fight.id}"></span>
+        <span th:text="${fight.fightname}"></span>
+        <span th:text="${session.user.username}" th:if="${session.user}!=null"></span>
+    </div>
+</div>
+<a th:href="@{sessionallnogoing}"><span id="arrow">&lt;</span></a>
+
+<div class="clearfix"></div>
+<div class="gridContainer clearfix">
+      <div id="search"  class="fluid bounceIn animated" >
+      	<form action="">
+
+        <input type="text" placeholder="输入您想投票的姓名或编号" class="search_text"/><button type="submit" class="search">搜索</button>
+        </form>
+      </div>
+</div>
+
+<div id="content_list" th:each="condidates:${condidates}" class="gridContainer clearfix bounceInDown animated">
+	<div class="content_list_li">
+    	<div class="content_list_li_left">
+        	<span><img th:src="@{vote}+${condidates.image}" src="images/img.jpg" /></span>
+        </div>
+        <div class="content_list_li_right">
+        	<div class="content_list_li_right_li condidateids"><strong>编号：</strong><span th:text="${condidates.id}"></span></div>
+            <div class="content_list_li_right_li"><strong>姓名：</strong><span th:text="${condidates.name}"></span></div>
+            <div class="content_list_li_right_li_a"><a class="btn to t1">投我吧</a></div>
+        </div>
+        <!--<a class="btn to t1" onClick="swal('投票成功!', '非常感谢,么么哒！', 'success')">投我吧</a>-->
+
+        <div class="clearfix"></div>
+    </div>
+</div>
+
+<div class="clearfix" style="height:2em;"></div>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script th:inline="javascript" type="text/javascript">
+    $(document).ready(function () {
+        var span = [];
+        $(".condidateids").each(function () {
+            span.push($(this).find("span").text())
+        });
+        console.log(span)
+
+
+        $(".content_list_li_right_li_a").click(function () {
+            var parent = $(this).parent()
+            var condidateid = parent.find("div.condidateids").find("span").text()
+            console.log(condidateid)
+            var fightid = $("#fightid").text()
+            var userid=[[${session.user.id}]]
+            console.log(userid)
+            console.log(fightid)
+
+            $.ajax({
+                url:"addvote",
+                type:"post",
+                data:{
+                    condidateid:condidateid,
+                    fightid:fightid,
+                    userid:userid
+                },
+                dataType:"json",
+                success:function (data) {
+
+                    if (data!=0){
+                        swal('投票成功!', '非常感谢,么么哒！', 'success')
+                    } else {
+                        $(this).find("a").removeClass("t1")
+                        $(this).find("a").addClass("on")
+                        swal('这场对战您已投票，非常感谢！')
+                    }
+
+                },
+            })
+            
+        })
+
+    })
+
+</script>
+</body>
+</html>

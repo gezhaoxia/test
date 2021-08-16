@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+
+<div>
+    <input id="ccvote" style="width: 30%;" name="dept" value="01"/>
+    <button id="jiansuo5" class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px">查看对战</button>
+
+</div>
+
+<div><table id="dgsvote2"></table></div>
+
+
+
+<!--双击对战表显示当前选中的对战的对战信息和人员信息-->
+<div id="selectfightvote" class="easyui-window" title="对战信息" style="width:600px;height:400px;"
+     data-options="iconCls:'icon-save',modal:true,closed:true">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:true" style="height:200px">
+            <lable>对战编号：</lable><input id="votefightids" class="easyui-textbox" data-options="readonly:true" style="width:100px"/>
+            <br/><br/>
+            <lable>对战标题：</lable><input id="votefighttitles" class="easyui-textbox" data-options="readonly:true" style="width:300px"/>
+            <br/><br/>
+            <lable>对战状态：</lable><input id="votefightsates" class="easyui-textbox" data-options="readonly:true" style="width:100px"/>
+            <button id="nofight" class="easyui-linkbutton" data-options="">开启对战</button>
+            <button id="offfight" class="easyui-linkbutton" data-options="">关闭对战</button>
+            <button id="censusvote" class="easyui-linkbutton" data-options="">统计得票</button>
+            <button id="forvs" class="easyui-linkbutton" data-options="">大屏显示</button>
+
+            <br/>
+            <table id="dgsvotenumber">
+                <thead>
+                <tr>
+                    <th>名字</th>
+                    <th>票数</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+
+        <div data-options="region:'center'">
+            <lable>参加这场对战的选手：</lable>
+            <table id="votefightrenlist"></table>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    //大屏显示
+    $("#forvs").click(function () {
+
+        var fightid = $("#votefightids").textbox("getText")
+
+        document.location.href=`/forvs?fightid=${fightid}`
+        // $.ajax({
+        //     url:"/forvs",
+        //     type:"get",
+        //     data:{
+        //         fightid:fightid
+        //     }
+        // })
+
+    })
+
+    //统计投票
+    $("#censusvote").click(function () {
+        var fightid = $("#votefightids").textbox("getText")
+        var rows = $("#votefightrenlist").datagrid("getRows");
+        $.ajax({
+            url:"censusvote",
+            type:"get",
+            data:{
+                fightid:fightid
+            },
+            success:function (data) {
+                $("#dgsvotenumber").find("tbody").html("")
+
+                console.log(data)
+                for (var i = 0; data.length >i ; i++) {
+                    console.log(data[i])
+
+                    $("#dgsvotenumber").find("tbody").append(`
+                <tr>
+                    <td>${rows[i].name}</td>
+                    <td>${data[i]}</td>
+                </tr>`)
+                }
+            }
+        })
+    })
+
+    //开关按钮
+    $("#nofight").click(function () {
+
+        var g = $('#ccvote').combogrid('grid');	// 当前父类option
+        var r = g.datagrid('getSelected');	// 当前比赛的信息
+
+        var state = $("#votefightsates").textbox("getText")
+        var fightid = $("#votefightids").textbox("getText")
+        if (state=="进行中"){
+            alert("对战正在进行中")
+        } else {
+            //检测是否有对战在进行中开启对战
+            $.ajax({
+                url:"fightnogoingone",
+                type:"get",
+                data:{
+                    sessionid:r.id,
+                },
+                success:function (data) {
+                    console.log(data)
+                    if (data==""){
+                        $.ajax({
+                            url:"fightstateno",
+                            type:"get",
+                            data:{
+                                fightid:fightid
+                            },
+                            success:function (data) {
+                                alert("开启成功")
+                                $('#dgsvote2').datagrid('reload');
+                                $("#votefightsates").textbox("setText","进行中")
+                            }
+
+                        })
+                    } else {
+                        alert("这场比赛有对战正在进行中，如果要开启这场对战请先关闭其它对战")
+                    }
+                }
+            })
+        }
+    })
+
+    $("#offfight").click(function () {
+
+        var g = $('#ccvote').combogrid('grid');	// 当前父类option
+        var r = g.datagrid('getSelected');	// 当前比赛的信息
+
+        var state = $("#votefightsates").textbox("getText")
+        var fightid = $("#votefightids").textbox("getText")
+        if (state=="未开始"){
+            alert("对战已是未开始")
+        } else {
+            //关闭对战
+            $.ajax({
+                url:"fightstateoff",
+                type:"get",
+                data:{
+                    fightid:fightid
+                },
+                success:function (data) {
+                    alert("关闭成功")
+                    $('#dgsvote2').datagrid('reload');
+                    $("#votefightsates").textbox("setText","未开始")
+                }
+
+            })
+        }
+    })
+
+
+
+    // 生成头部选择栏
+    $('#ccvote').combogrid({
+        panelWidth:550,
+        value:'请选择要查看的比赛场次',
+        idField:'id',
+        textField:'title',
+        url:'sessionall',
+        columns:[[
+            {field:'id',title:'场次编号',width:60},
+            {field:'title',title:'比赛标题',width:150},
+            {field:'infomation',title:'比赛地点',width:120},
+            {field:'time',title:'时间',width:80},
+            {field:'state',title:'状态',width:80}
+        ]]
+    });
+
+    //检索这场比赛的所有对战信息
+    $("#jiansuo5").click(function () {
+
+        var g = $('#ccvote').combogrid('grid');	// 当前父类option
+        var r = g.datagrid('getSelected');	// 当前比赛的信息
+
+        $("#dgsvote2").datagrid({
+            url: "/selectfightall",
+            queryParams: {
+                id: r.id
+            },
+            singleSelect: true,
+            pagination: true,
+            pageSize: 10,
+            pageList: [10, 20, 30],
+            method: "get",
+            columns: [[
+                {field: 'id', title: '对战编号', width: 100},
+                {field: 'state', title: '对战状态', width: 200,},
+                {field: 'fightname', title: '对战名称', width: 200, align: 'right'}                    ]]
+        });
+    })
+
+    //双击对战列表中的人可以对这场对战的人员进行查看
+    $('#dgsvote2').datagrid({
+        onDblClickCell:function () {
+            $('#selectfightvote').window('open'); // open a window
+
+            var g = $('#ccvote').combogrid('grid');	// 当前父类option
+            var r = g.datagrid('getSelected');	// 当前比赛的信息
+
+            var s = $('#dgsvote2').datagrid("getSelected")
+            console.log(s)
+            $("#votefightids").textbox("setText",s.id)
+            $("#votefighttitles").textbox("setText",s.fightname)
+            if (s.state==0){
+                $("#votefightsates").textbox("setText","未开始")
+            }
+            if(s.state==1){
+                $("#votefightsates").textbox("setText","进行中")
+            }
+            if(s.state==2){
+                $("#votefightsates").textbox("setText","已结束")
+            }
+
+
+            $('#votefightrenlist').datagrid({
+                url: 'selectfightcondidate',
+                type:"get",
+                queryParams: {
+                    id: s.id
+                },
+                singleSelect: true,
+                columns: [[
+                    {field: 'id', title: '编号', width: 60},
+                    {field: 'name', title: '名字', width: 100},
+                    {field: 'discrible', title: '介绍', width: 200, align: 'right'},
+                    {field: 'image', title: '图片', width: 200, align: 'right'}
+                ]]
+            });
+        }
+    });
+
+</script>
+</body>
+</html>

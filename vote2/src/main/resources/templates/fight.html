@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+
+<div>
+    <input id="cc2" style="width: 30%;" name="dept" value="01"/>
+    <button id="jiansuo2" class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px">检索对战信息</button>
+
+    <div id="ttfight">
+        <button id="addfight" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加对战</button>
+        <button id="deletefight" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">删除对战</button>
+        <!--<button id="" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</button>-->
+    </div>
+    <div class=""><table id="dgs2"></table></div>
+
+</div>
+
+
+<!--//添加参赛人员的窗口-->
+<div id="fightrenwin" class="easyui-window" title="My Window" style="width:600px;height:600px"
+     data-options="iconCls:'icon-save',modal:true,closed:true">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:true" style="height:300px">
+            <label>参加这场比赛的选手：</label>
+            <br/>
+            <table id="fightallcondidate"></table>
+        </div>
+        <div data-options="region:'center'">
+            <lable>参加这场对战的选手：</lable>
+            <button id="addfightcondidate" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加</button>
+            <button id="deletefightcondidate" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">删除</button>
+            <br/>
+            <lable>对战编号：</lable><input id="autofightid" class="easyui-textbox" data-options="readonly:true" style="width:50px"/>
+            <button id="autoidbutton" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:80px">生成编号</button>
+            <br/>
+            <lable>对战标题：</lable><input id="fightname" class="easyui-textbox" data-options="" style="width:300px"/>
+            <br/>
+            <lable>对战状态：</lable>
+            <select id="fightstatesel"  class="easyui-combobox" name="dept" style="width:200px;">
+                <option value="0">未开始</option>
+                <option value="1">进行中</option>
+                <option value="2">已结束</option>
+            </select>
+            <br/>
+            <lable>对战人员：</lable>
+            <table  class="easyui-datagrid" id="fightcondidates" data-options="singleSelect:true"></table>
+            <br/>
+            <button style="width: 100px;" id="addduizhan" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存并添加</button>
+        </div>
+    </div>
+
+
+</div>
+
+<!--双击对战表显示当前选中的对战的对战信息和人员信息-->
+<div id="selectfight" class="easyui-window" title="对战信息" style="width:600px;height:400px;"
+     data-options="iconCls:'icon-save',modal:true,closed:true">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:true" style="height:200px">
+            <lable>对战编号：</lable><input id="fightids" class="easyui-textbox" data-options="readonly:true" style="width:100px"/>
+            <br/><br/>
+            <lable>对战标题：</lable><input id="fighttitles" class="easyui-textbox" data-options="readonly:true" style="width:300px"/>
+            <br/><br/>
+            <lable>对战状态：</lable><input id="fightsates" class="easyui-textbox" data-options="readonly:true" style="width:100px"/>
+        </div>
+        <div data-options="region:'center'">
+            <lable>参加这场对战的选手：</lable>
+            <table id="fightrenlist"></table>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+
+
+
+
+    //删除一场对战包括对战人员表中的该场对战的信息
+    $("#deletefight").click(function () {
+        var duizhanid = $('#dgs2').datagrid("getSelected")
+        if (duizhanid==null){
+            alert("请选择要删除的对战")
+            return false
+        } else {
+            $.ajax({
+                url:"deletefight",
+                type:"get",
+                data:{
+                    fightid:duizhanid.id
+                },
+                success:function (data) {
+                    alert("删除成功")
+                    $('#dgs2').datagrid('reload');
+
+                }
+            })
+
+        }
+
+    })
+
+
+    //自动生成对战编号返回对战的信息显示(添加一场对战)
+    $("#autoidbutton").click(function () {
+
+        var g = $('#cc2').combogrid('grid');	// 当前父类option
+        var r = g.datagrid('getSelected');	// 当前比赛的信息
+        var fightname = $("#fightname").textbox("getText")
+        var selectstate = $("#fightstatesel").combobox("getValue")
+
+
+        console.log(r.id)
+        console.log(fightname)
+        console.log(selectstate)
+        if (fightname==""){
+            alert("请填写对战题目")
+            return false
+        } else{
+            $.ajax({
+                url:"addfight",
+                type:"post",
+                data:{
+                    sessionid:r.id,
+                    "fightname":fightname,
+                    state:selectstate
+                },
+                success:function (data) {
+                    $("#autofightid").textbox("setText",data.id)
+                    $("#autoidbutton").css("display","none")
+                }
+            })
+
+        }
+    })
+
+    
+    //为这场对战添加一个人
+    $("#addfightcondidate").click(function () {
+        var renid = $("#fightallcondidate").datagrid("getSelected")
+        var duizhanid = $('#dgs2').datagrid("getSelected")
+        var autoid = $("#autofightid").textbox("getText")
+        console.log(renid)
+        console.log($("#fightcondidates").length)
+        if (renid==null){
+            alert("请从上方选择要加入对战的人")
+            return false
+        } else {
+            if (autoid=="")
+            {
+                alert("请先生成您的对战编号")
+                return false
+            }else {
+
+                // 要验证下方表是否已经存在这个人
+                // 这段代码是获取当前页的所有行。
+                //要拿到上面表的选中行的id和下面表的所有id信息
+
+                var rowsss = $("#fightcondidates").datagrid("getRows");
+                console.log(rowsss)
+                if (rowsss!=null)
+                {
+                    for(var i=0;rowsss.length>i;i++)
+                    {
+                        //获取每一行的数据
+                        if (rowsss[i].id==renid.id){
+                            alert("此人员已经参加这场对战")
+                            return false
+                        }
+                    }
+                }
+
+                $.ajax({
+                    url:"addfightcondidate",
+                    type:"get",
+                    data:{
+                        fightid:autoid,
+                        condidateid:renid.id
+                    },
+                    success:function (data) {
+                        alert("添加成功"+data)
+
+                        $('#fightcondidates').datagrid('insertRow',
+                            {
+                                index: 0,	// index start with 0
+                                row: {
+                                    id:renid.id,
+                                    name:renid.name,
+                                    discrible:renid.discrible,
+                                    image:renid.image
+                                }
+                            });
+                        $('#dgs2').datagrid('reload');
+                    },
+                    error:function () {
+                        alert("添加失败")
+                    }
+
+                })
+            }
+
+        }
+
+    })
+
+    //保存并添加保证下边表格中至少有两条或者两条以上的数据
+    $("#addduizhan").click(function () {
+        var tab = $('#tt').tabs('getSelected');
+        //获得当前选中的tab 的href
+        var url = $(tab.panel('options')).attr('href');
+        console.log(url)
+        tab.panel('refresh', url);
+    })
+    
+    
+    //为这场对战删除一个人
+    $("#deletefightcondidate").click(function () {
+        var fightids = $("#fightids").textbox("getText")//生成的对战编号
+        var fightcondi = $("#fightcondidates").datagrid("getSelected")//下方对战人
+
+        console.log(fightname)
+        console.log("你好")
+        console.log(fightcondi)
+        if (fightcondi==null){
+            alert("请从下方对战列表中选取要删除的人")
+            return false
+        } else {
+            $.ajax({
+                url:"deletfightcondidate",
+                type:"get",
+                data:{
+                    fightid:fightids.id,
+                    condidateid:fightcondi.id
+                },
+                success:function (data) {
+                    alert("删除成功"+data)
+                    var index = $('#fightcondidates').datagrid("getRowIndex",$("#fightcondidates").datagrid('getSelected'))
+                    $('#fightcondidates').datagrid('deleteRow',index)
+                },
+                error:function (data) {
+                    alert("删除失败"+data)
+                }
+            })
+        }
+    })
+    
+
+    //进入对战添加页面需要的操作
+    $("#addfight").click(function () {
+
+        $('#fightrenwin').panel('open').panel('refresh');
+
+
+        $('#fightcondidates').datagrid('loadData', { total: 0, rows: [] });
+        $('#autoidbutton').css("display","block")
+        $("#autofightid").textbox("setText","")
+        $("#fightname").textbox("setText","")
+
+
+        var g = $('#cc2').combogrid('grid');	// 当前父类option
+        var r = g.datagrid('getSelected');	// 当前比赛的信息
+        
+        if (r==null){
+            alert("请选择要添加对战的比赛")
+            return false
+        }else{
+            $('#fightallcondidate').datagrid({
+                url: 'sessionidallcondidate',
+                queryParams: {
+                    id: r.id
+                },
+                singleSelect: true,
+                columns: [[
+                    {field: 'id', title: '编号', width: 60},
+                    {field: 'name', title: '名字', width: 100},
+                    {field: 'discrible', title: '介绍', width: 200, align: 'right'},
+                    {field: 'image', title: '图片', width: 200, align: 'right'}
+                ]]
+            });
+
+            $('#fightcondidates').datagrid({
+                // url: 'selectfightcondidate',
+                // queryParams: {
+                //     id: r.id
+                // },
+                singleSelect: true,
+                columns: [[
+                    {field: 'id', title: '编号', width: 60},
+                    {field: 'name', title: '名字', width: 100},
+                    {field: 'discrible', title: '介绍', width: 200, align: 'right'},
+                    {field: 'image', title: '图片', width: 200, align: 'right'}
+                ]]
+            });
+        }
+
+        
+
+    })
+
+    // 生成头部选择栏
+    $('#cc2').combogrid({
+        panelWidth:550,
+        value:'请选择要查看的比赛场次',
+        idField:'id',
+        textField:'title',
+        url:'sessionall',
+        columns:[[
+            {field:'id',title:'场次编号',width:60},
+            {field:'title',title:'比赛标题',width:150},
+            {field:'infomation',title:'比赛地点',width:120},
+            {field:'time',title:'时间',width:80},
+            {field:'state',title:'状态',width:80}
+        ]]
+    });
+
+    //检索这场比赛的所有对战信息
+    $("#jiansuo2").click(function () {
+
+        var g = $('#cc2').combogrid('grid');	// 当前父类option
+        var r = g.datagrid('getSelected');	// 当前比赛的信息
+
+        $("#dgs2").datagrid({
+            url: "/selectfightall",
+            queryParams: {
+                id: r.id
+            },
+            singleSelect: true,
+            pagination: true,
+            pageSize: 10,
+            pageList: [10, 20, 30],
+            method: "get",
+            columns: [[
+                {field: 'id', title: '对战编号', width: 100},
+                {field: 'state', title: '对战状态', width: 200,},
+                {field: 'fightname', title: '对战名称', width: 200, align: 'right'}                    ]]
+        });
+    })
+
+    // //一个对战人员的窗口
+    // $('#fightrenwin').window({
+    //     title: "编辑一场对战",
+    //     width: 600,
+    //     height: 400,
+    //     draggable: true,
+    //     resizable: true,
+    //     shadow: false
+    // });
+
+
+    //双击对战列表中的人可以对这场对战的人员进行查看
+    $('#dgs2').datagrid({
+        onDblClickCell:function () {
+            $('#selectfight').window('open'); // open a window
+
+            var g = $('#cc2').combogrid('grid');	// 当前父类option
+            var r = g.datagrid('getSelected');	// 当前比赛的信息
+
+            var s = $('#dgs2').datagrid("getSelected")
+            console.log(s)
+            $("#fightids").textbox("setText",s.id)
+            $("#fighttitles").textbox("setText",s.fightname)
+            if (s.state==0){
+                $("#fightsates").textbox("setText","未开始")
+            }
+            if(s.state==1){
+                $("#fightsates").textbox("setText","进行中")
+            }
+            if(s.state==2){
+                $("#fightsates").textbox("setText","已结束")
+            }
+
+
+            $('#fightrenlist').datagrid({
+                url: 'selectfightcondidate',
+                type:"get",
+                queryParams: {
+                    id: s.id
+                },
+                singleSelect: true,
+                columns: [[
+                    {field: 'id', title: '编号', width: 60},
+                    {field: 'name', title: '名字', width: 100},
+                    {field: 'discrible', title: '介绍', width: 200, align: 'right'},
+                    {field: 'image', title: '图片', width: 200, align: 'right'}
+                ]]
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

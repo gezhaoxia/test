@@ -1,0 +1,66 @@
+.s-sg img{
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    top: -80px;
+    left: 295px;
+}
+.s-vs{
+    margin-top: 80px;
+    float: left;
+    width: 800px;
+    position: relative;
+}
+.s-vs-l{
+    height: 20px;
+    width: 390px;
+    background: linear-gradient(#b5f5ec,#006d7f);;
+}
+.s-vs-r{
+    height: 20px;
+    float: right;
+    width: 400px;
+    background: linear-gradient(#ad4e00,#ff47ba);
+}
+.s-user1{
+    text-align: center;
+    line-height: 200px;
+    float: left;
+    width: 100px;
+    height: 200px;
+    font-size: 24px;
+}
+.s-user2{
+    text-align: center;
+    line-height: 200px;
+    float: left;
+    width: 100px;
+    font-size: 24px;
+    height: 200px;
+}
+.s-bg{
+    width: 100vw;
+    height: 100vh;
+    background: url("../vote/images/bg.png") no-repeat;
+    background-size: 105% 105%;
+}
+.s-all-vs{
+    position: absolute;
+    top: 70px;
+    left: 200px;
+}
+.s-user1-l{
+    color: red;
+    font-size: 20px;
+    position: absolute;
+    left: 100px;
+    top: 40px;
+
+}
+.s-user2-r{
+    color: red;
+    font-size: 20px;
+    position: absolute;
+    right: 100px;
+    top: 40px;
+}
